@@ -139,9 +139,9 @@ DEFAULT_JWT=$(kubectl create token default)
 vault write -format=json auth/kubernetes/login role=default jwt=$DEFAULT_JWT |tee -a vault.log |jq -r '.auth.client_token' >kube.token
 vault login $(cat kube.token)
 
-read x
 curl -ivsk -X GET  http://127.0.0.1:8200/v1/sys/health
 vault status
+
 xecho "Delete kind cluster?(y/n)[Default n]" && read x 
 [ "Z${x}" == "Zy" ] && kind delete cluster --name v11590 || xecho "Kind cluster v11590 was left running..."
 
