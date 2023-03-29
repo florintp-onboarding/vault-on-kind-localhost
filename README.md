@@ -34,15 +34,59 @@ chmod +rx create_cluster.sh
 bash create_cluster.sh
 ```
 
-4. Export the VAULT_ADDR, VAULT_TOKEN, login to Vault and check the status of Vault cluster
+4.  The ouput might look like:
 ```shell
-unset VAULT_TOKEN
-export VAULT_ADDR="http://127.0.0.1:8200"
-vault status
-export VAULT_TOKEN=$(jq -r ".root_token" init-keys.json)
-vault login $VAULT_TOKEN
-vault auth list
-vault operator raft list-peers
+This script creates a KIND Kubernetes cluster, a Vault with raft storage and test the Kubernetes AUTH.
+View the README.md for complete guide.
+
+Usage: create_cluster.sh [clean]
+No kind clusters found.
+Creating cluster "v11590" ...
+ ✓ Ensuring node image (kindest/node:v1.25.3) 🖼
+ ✓ Preparing nodes 📦
+ ✓ Writing configuration 📜
+ ✓ Starting control-plane 🕹️
+ ✓ Installing CNI 🔌
+ ✓ Installing StorageClass 💾
+Set kubectl context to "kind-v11590"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-v11590
+
+Have a nice day! 👋
+serviceaccount/vault created
+clusterrolebinding.rbac.authorization.k8s.io/system:auth-delegator:vault created
+
+#### [Vault started.] ####
+HTTP/1.1 429 Too Many Requests
+
+#### [Waiting Vault to reach to unseal and active...] ####
+
+#### [Vault is unsealed.] ####
+
+#### [Generate a Kubernetes test serviceaccount token] ####
+
+#### [Attempt login with the JWT] ####
+Success! You are now authenticated. The token information displayed below
+is already stored in the token helper. You do NOT need to run "vault login"
+again. Future Vault requests will automatically use this token.
+
+Key                                       Value
+---                                       -----
+token                                     hvs.CAESIANZJCK5-jwE2TjTblZOGqdfuHtjvFSEWI2ZsOC5xkWHGh4KHGh2cy53R2pWTGIwS2NhTWJIcDNIWktjOU02WUo
+token_accessor                            pfTee12RYVf75LF0BTk6eOdb
+token_duration                            768h
+token_renewable                           true
+token_policies                            ["default"]
+identity_policies                         []
+policies                                  ["default"]
+token_meta_service_account_uid            70811a92-e2aa-428c-a9bd-bd58a86a0935
+token_meta_role                           default
+token_meta_service_account_name           default
+token_meta_service_account_namespace      default
+token_meta_service_account_secret_name    n/a
+
+#### [Keep kind cluster?(y)[Default n]] ####
 ```
 
 5. Cleanup the infrastructure and local files
