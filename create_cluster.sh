@@ -13,6 +13,12 @@ if [ "$os_name" != "darwin" ] && [ "$os_name" != "linux" ]; then
   exit 1
 fi
 
+if netstat -an|grep LISTEN|grep ':8200' ||
+   netstat -an|grep LISTEN|grep '127.0.0.1.8200' ; then
+  >&2 echo "Sorry, there is a dameon already listening on 8200."
+  exit 2
+fi
+
 export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 chmod +rx ${DIR}/clean.sh
 ${DIR}/clean.sh
@@ -32,23 +38,24 @@ function xvault {
 
 #create k8s cluster via kind
 function createkind {
-kind get clusters |grep v11590
-if [ $? -eq 0 ] ; then
-  xecho "Kind cluster already present!"
-  kind delete cluster --name=v11590 
-  kind get clusters
-fi
-kind create cluster --name v11590 
-
-# create vault serviceaccount & binding
-kubectl create sa vault
-kubectl create clusterrolebinding \
-        system:auth-delegator:vault \
-        --clusterrole=system:auth-delegator \
-        --serviceaccount=default:vault
-
-# create vault reviewer token
-export VAULT_REVIEWER_JWT=$(kubectl create token vault)
+  xecho "Creating KIND Cluster with name v11590"
+  kind -q get clusters |grep v11590
+  if [ $? -eq 0 ] ; then
+    xecho "Kind cluster already present!"
+    kind -q delete cluster --name=v11590 
+    kind -q get clusters
+  fi
+  kind -q create cluster --name v11590 
+  
+  # create vault serviceaccount & binding
+  kubectl create sa vault
+  kubectl create clusterrolebinding \
+          system:auth-delegator:vault \
+          --clusterrole=system:auth-delegator \
+          --serviceaccount=default:vault
+  
+  # create vault reviewer token
+  export VAULT_REVIEWER_JWT=$(kubectl create token vault)
 }
 
 function createvault {
