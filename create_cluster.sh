@@ -94,8 +94,10 @@ EOF
   done
   xecho "Vault started."
   sleep 2 
+  set +vx
   # initialize & unseal vault
   xvault operator init -key-shares=1 -key-threshold=1 -format=json > init-keys.json 2>&1
+  
   VAULT_UNSEAL_KEY=$(jq -r ".unseal_keys_b64[]" init-keys.json)
   VAULT_ROOT_KEY=$(jq -r ".root_token" init-keys.json)
   while curl -isk -X GET  http://${VAULT_IP}:8200/v1/sys/health|tee -a vault.log|head -n1|grep -v 503 ; do
@@ -132,6 +134,7 @@ function testauth {
 
   xecho "Attempt login with the JWT"
   unset VAULT_TOKEN ; rm -f ~/.vault-token
+  set +vx
   xvault write -format=json auth/kubernetes/login role=default jwt=$DEFAULT_JWT|jq -r ".auth.client_token" > kube.token
   xvault login $(cat kube.token) 
 
